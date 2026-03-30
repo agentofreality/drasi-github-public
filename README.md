@@ -7,13 +7,19 @@ Org-level configurations, reusable workflows, community health files, and agenti
 ```
 .github/workflows/          Reusable CI workflows (called via workflow_call)
 ├── rust-unit-test.yaml      Rust test: caching, Redis, system deps, toolchain
-└── rust-lint.yaml           Rust lint: clippy + fmt, caching, system deps
+├── rust-lint.yaml           Rust lint: clippy + fmt, caching, system deps
+├── cargo-audit.yaml         Dependency vulnerability scanning (cargo audit + cargo deny)
+└── devskim.yaml             Microsoft DevSkim security scanner with SARIF upload
 
 workflow-templates/          Starter templates (shown in Actions → New workflow)
-├── rust-unit-test.yml
-├── rust-unit-test.properties.json
-├── rust-lint.yml
-└── rust-lint.properties.json
+├── rust-unit-test.yml                       Rust tests
+├── rust-lint.yml                            Rust lint
+├── cargo-audit.yml                          Cargo audit
+├── devskim.yml                              DevSkim security scan
+├── pr-assignment-check.yml                  PR assignment check
+├── pr-first-approval-label.yml              PR review trigger (Stage 1)
+└── pr-first-approval-label-run.yml          Label on first approval (Stage 2)
+  (each .yml has a matching .properties.json)
 
 agentic-workflows/           Copilot agentic workflow source files (.md)
 ├── README.md                Setup and sync instructions
@@ -49,6 +55,10 @@ jobs:
     uses: drasi-project/.github/.github/workflows/rust-unit-test.yaml@main
   lint:
     uses: drasi-project/.github/.github/workflows/rust-lint.yaml@main
+  audit:
+    uses: drasi-project/.github/.github/workflows/cargo-audit.yaml@main
+  devskim:
+    uses: drasi-project/.github/.github/workflows/devskim.yaml@main
 ```
 
 See each workflow file for available inputs and defaults.
