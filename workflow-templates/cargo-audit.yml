@@ -1,0 +1,22 @@
+name: Cargo Audit
+
+on:
+  push:
+    branches:
+      - $default-branch
+  pull_request:
+    branches:
+      - $default-branch
+  schedule:
+    - cron: '0 6 * * 1'  # Weekly on Monday at 06:00 UTC
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    uses: drasi-project/.github/.github/workflows/cargo-audit.yaml@main
+    # with:
+    #   audit-args: ""                  # extra args for cargo audit
+    #   deny-args: "licenses sources"   # uncomment to also run cargo deny
+    #   working-directory: "."          # default: "."

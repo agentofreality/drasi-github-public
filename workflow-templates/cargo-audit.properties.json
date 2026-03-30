@@ -1,0 +1,7 @@
+{
+  "name": "Drasi Cargo Audit",
+  "description": "Scan Rust dependencies for known vulnerabilities using cargo-audit (and optionally cargo-deny).",
+  "iconName": "octicon shield-lock",
+  "categories": ["Rust", "Security"],
+  "filePatterns": ["Cargo.toml"]
+}
