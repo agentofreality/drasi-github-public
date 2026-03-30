@@ -1,0 +1,29 @@
+name: Rust Lint
+
+on:
+  push:
+    branches:
+      - $default-branch
+      - release/*
+  pull_request:
+    branches:
+      - $default-branch
+      - feature/*
+      - release/*
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    uses: drasi-project/.github/.github/workflows/rust-lint.yaml@main
+    # with:
+    #   clippy-command: "cargo clippy --all-targets"  # default
+    #   fmt-command: "cargo fmt -- --check"            # default
+    #   install-protobuf: true                         # default: true
+    #   install-jq: false                              # default: false
+    #   additional-apt-packages: "build-essential autoconf automake libtool flex bison"
+    #   rust-toolchain: ""                             # default: uses repo's rust-toolchain.toml
+    #   working-directory: "."                         # default: "."
+    #   submodules: "recursive"                        # default: "recursive"
+    #   runner: "ubuntu-latest"                        # default: "ubuntu-latest"

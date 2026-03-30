@@ -1,0 +1,7 @@
+{
+  "name": "Drasi Rust Lint",
+  "description": "Run Clippy and rustfmt checks using the org-wide reusable workflow (includes Cargo caching, system deps).",
+  "iconName": "octicon gear",
+  "categories": ["Rust", "CI"],
+  "filePatterns": ["Cargo.toml"]
+}
