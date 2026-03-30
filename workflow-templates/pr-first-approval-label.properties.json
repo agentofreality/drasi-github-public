@@ -1,0 +1,6 @@
+{
+  "name": "Drasi PR Review Trigger (Stage 1)",
+  "description": "Saves PR number on approval for the labeling workflow. Must be used with pr-first-approval-label-run.yml.",
+  "iconName": "octicon eye",
+  "categories": ["PR", "Governance"]
+}
