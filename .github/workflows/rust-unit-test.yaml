@@ -9,7 +9,7 @@ on:
         type: string
         default: "."
       test-command:
-        description: "Command to run tests (e.g. 'make test' or 'cargo test')"
+        description: "Command to run tests. Can be multi-line. (e.g. 'cargo test --workspace' or 'make test')"
         required: false
         type: string
         default: "make test"
@@ -44,6 +44,7 @@ on:
         type: string
         default: "ubuntu-latest"
 
+
 permissions:
   contents: read
 
@@ -55,12 +56,20 @@ jobs:
   test:
     name: Rust Unit Tests
     runs-on: ${{ inputs.runner }}
+
+    services:
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+
     defaults:
       run:
         working-directory: ${{ inputs.working-directory }}
+
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           submodules: ${{ inputs.submodules }}
 
@@ -93,6 +102,33 @@ jobs:
       - name: Detect Rust toolchain from repo
         if: inputs.rust-toolchain == ''
         run: rustup show
+
+      - name: Cache Cargo registry
+        uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4.2.2
+        with:
+          path: ~/.cargo/registry
+          key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-registry-
+
+      - name: Cache Cargo index
+        uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4.2.2
+        with:
+          path: ~/.cargo/git
+          key: ${{ runner.os }}-cargo-index-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-index-
+
+      - name: Cache Cargo build
+        uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4.2.2
+        with:
+          path: target
+          key: ${{ runner.os }}-cargo-build-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-build-
+
+      - name: Set REDIS_URL
+        run: echo "REDIS_URL=redis://localhost:6379" >> $GITHUB_ENV
 
       - name: Run tests
         run: ${{ inputs.test-command }}
