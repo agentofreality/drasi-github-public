@@ -6,6 +6,12 @@ on:
         description: "Full URL of the issue to research (e.g. https://github.com/drasi-project/drasi-core/issues/42)"
         required: true
         type: string
+  workflow_call:
+    inputs:
+      issue_url:
+        description: "Full URL of the issue to research"
+        required: true
+        type: string
 permissions:
   contents: read
   actions: read
