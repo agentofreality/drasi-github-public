@@ -23,7 +23,7 @@ safe-outputs:
   add-comment:
     max: 1
     target: "*"
-    allowed-repos: ["drasi-project/*"]
+    allowed-repos: ["drasi-project/*", "ruokun-niu/*"]
     github-token: ${{ secrets.ISSUE_UPDATE_TOKEN }}
 ---
 
