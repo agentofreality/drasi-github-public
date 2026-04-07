@@ -23,7 +23,6 @@ jobs:
     #   install-protobuf: true                         # default: true
     #   install-jq: false                              # default: false
     #   additional-apt-packages: "build-essential autoconf automake libtool flex bison"
-    #   rust-toolchain: ""                             # default: uses repo's rust-toolchain.toml
     #   working-directory: "."                         # default: "."
     #   submodules: "recursive"                        # default: "recursive"
     #   runner: "ubuntu-latest"                        # default: "ubuntu-latest"

@@ -38,11 +38,6 @@ on:
         required: false
         type: string
         default: "build-essential autoconf automake libtool flex bison"
-      rust-toolchain:
-        description: "Rust toolchain to install (e.g. '1.82.0', 'stable'). Leave empty to use the repo's rust-toolchain.toml."
-        required: false
-        type: string
-        default: ""
       runner:
         description: "GitHub Actions runner label"
         required: false
@@ -88,16 +83,11 @@ jobs:
         if: inputs.install-jq
         run: echo "JQ_LIB_DIR=/usr/lib/x86_64-linux-gnu" >> $GITHUB_ENV
 
-      - name: Install Rust toolchain
-        if: inputs.rust-toolchain != ''
+      - name: Install Rust 1.88.0
         uses: dtolnay/rust-toolchain@master
         with:
-          toolchain: ${{ inputs.rust-toolchain }}
+          toolchain: "1.88.0"
           components: clippy
-
-      - name: Detect Rust toolchain from repo
-        if: inputs.rust-toolchain == ''
-        run: rustup show
 
       - name: Cache Cargo registry
         uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4.2.2
@@ -154,16 +144,11 @@ jobs:
             sudo apt-get update && sudo apt-get install -y $packages
           fi
 
-      - name: Install Rust toolchain
-        if: inputs.rust-toolchain != ''
+      - name: Install Rust 1.88.0
         uses: dtolnay/rust-toolchain@master
         with:
-          toolchain: ${{ inputs.rust-toolchain }}
+          toolchain: "1.88.0"
           components: rustfmt
-
-      - name: Detect Rust toolchain from repo
-        if: inputs.rust-toolchain == ''
-        run: rustup show
 
       - name: Run Format Check
         run: ${{ inputs.fmt-command }}

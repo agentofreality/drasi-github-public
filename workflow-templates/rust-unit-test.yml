@@ -25,6 +25,5 @@ jobs:
     #   install-protobuf: true                 # default: true
     #   install-jq: true                       # default: true
     #   additional-apt-packages: ""            # extra apt packages
-    #   rust-toolchain: ""                     # default: uses repo's rust-toolchain.toml
     #   submodules: "recursive"                # default: "recursive"
     #   runner: "ubuntu-latest"                # default: "ubuntu-latest"
