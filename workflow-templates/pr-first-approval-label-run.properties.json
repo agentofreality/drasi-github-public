@@ -1,0 +1,6 @@
+{
+  "name": "Drasi Label PR on First Approval (Stage 2)",
+  "description": "Adds 'need-2nd-review' label on first approval, removes it on second. Must be used with pr-first-approval-label.yml.",
+  "iconName": "octicon tag",
+  "categories": ["PR", "Governance"]
+}

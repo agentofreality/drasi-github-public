@@ -1,0 +1,124 @@
+name: Rust Unit Tests
+
+on:
+  workflow_call:
+    inputs:
+      working-directory:
+        description: "Directory containing the Rust project (relative to repo root)"
+        required: false
+        type: string
+        default: "."
+      test-command:
+        description: "Command to run tests. Can be multi-line. (e.g. 'cargo test --workspace' or 'make test')"
+        required: false
+        type: string
+        default: "make test"
+      submodules:
+        description: "Whether to checkout submodules ('true', 'recursive', or 'false')"
+        required: false
+        type: string
+        default: "recursive"
+      install-protobuf:
+        description: "Install protobuf-compiler"
+        required: false
+        type: boolean
+        default: true
+      install-jq:
+        description: "Install libjq-dev and libonig-dev and set JQ_LIB_DIR"
+        required: false
+        type: boolean
+        default: true
+      additional-apt-packages:
+        description: "Space-separated list of extra apt packages to install"
+        required: false
+        type: string
+        default: ""
+      runner:
+        description: "GitHub Actions runner label"
+        required: false
+        type: string
+        default: "ubuntu-latest"
+
+
+permissions:
+  contents: read
+
+env:
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: 1
+
+jobs:
+  test:
+    name: Rust Unit Tests
+    runs-on: ${{ inputs.runner }}
+
+    services:
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+
+    defaults:
+      run:
+        working-directory: ${{ inputs.working-directory }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          submodules: ${{ inputs.submodules }}
+
+      - name: Install system dependencies
+        run: |
+          packages=""
+          if [[ "${{ inputs.install-jq }}" == "true" ]]; then
+            packages="libjq-dev libonig-dev"
+          fi
+          if [[ "${{ inputs.install-protobuf }}" == "true" ]]; then
+            packages="$packages protobuf-compiler"
+          fi
+          if [[ -n "${{ inputs.additional-apt-packages }}" ]]; then
+            packages="$packages ${{ inputs.additional-apt-packages }}"
+          fi
+          if [[ -n "$packages" ]]; then
+            sudo apt-get update && sudo apt-get install -y $packages
+          fi
+
+      - name: Set JQ_LIB_DIR
+        if: inputs.install-jq
+        run: echo "JQ_LIB_DIR=/usr/lib/x86_64-linux-gnu" >> $GITHUB_ENV
+
+      - name: Install Rust 1.88.0
+        run: |
+          rustup toolchain install 1.88.0 --profile minimal
+          rustup default 1.88.0
+
+      - name: Cache Cargo registry
+        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
+        with:
+          path: ~/.cargo/registry
+          key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-registry-
+
+      - name: Cache Cargo index
+        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
+        with:
+          path: ~/.cargo/git
+          key: ${{ runner.os }}-cargo-index-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-index-
+
+      - name: Cache Cargo build
+        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
+        with:
+          path: target
+          key: ${{ runner.os }}-cargo-build-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-build-
+
+      - name: Set REDIS_URL
+        run: echo "REDIS_URL=redis://localhost:6379" >> $GITHUB_ENV
+
+      - name: Run tests
+        run: ${{ inputs.test-command }}
