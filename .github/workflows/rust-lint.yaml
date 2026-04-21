@@ -150,3 +150,24 @@ jobs:
 
       - name: Run Format Check
         run: ${{ inputs.fmt-command }}
+
+  typos:
+    name: Typo Check
+    runs-on: ${{ inputs.runner }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          submodules: ${{ inputs.submodules }}
+
+      - name: Fetch central typos config
+        if: ${{ hashFiles('_typos.toml') == '' }}
+        run: |
+          curl -fsSL \
+            "https://raw.githubusercontent.com/drasi-project/.github/main/_typos.toml" \
+            -o "_typos.toml"
+
+      - name: Check for typos
+        uses: crate-ci/typos@cf5f1c29a8ac336af8568821ec41919923b05a83 # v1.45.1
+        with:
+          files: ${{ inputs.working-directory }}
