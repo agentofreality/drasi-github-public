@@ -2,7 +2,7 @@
 on:
   pull_request:
     types: [labeled]
-  forks: ["*"]
+    forks: ["*"]
   status-comment: true
 if: github.event.label.name == 'review:docs' || github.event.label.name == 'review:all'
 permissions:

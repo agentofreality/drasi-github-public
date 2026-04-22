@@ -2,7 +2,7 @@
 on:
   pull_request:
     types: [labeled]
-  forks: ["*"]
+    forks: ["*"]
   status-comment: true
 if: github.event.label.name == 'review:testing' || github.event.label.name == 'review:all'
 permissions:
