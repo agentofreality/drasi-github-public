@@ -1,0 +1,26 @@
+# Central typos configuration for Drasi repositories.
+# Used by the reusable Rust Lint workflow when no repo-local config is provided.
+# See https://github.com/crate-ci/typos/blob/HEAD/docs/reference.md
+
+[files]
+extend-exclude = [
+    "*.lock",
+    "*.snap",
+    "vendor/",
+    "target/",
+    "node_modules/",
+    "*.min.js",
+    "*.min.css",
+]
+
+[default]
+# Add project-wide allowed words here.
+# These are words that typos flags as misspellings but are intentional.
+extend-ignore-re = [
+    # Ignore hex-encoded strings / hashes
+    "[a-fA-F0-9]{32,}",
+]
+
+[default.extend-words]
+# Add project-specific terms that should not be flagged.
+# Example: "crate" = "crate"

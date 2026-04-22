@@ -46,6 +46,19 @@
 
 name: "drasi-issue-researcher"
 "on":
+  workflow_call:
+    inputs:
+      issue_url:
+        description: Full URL of the issue to research
+        required: true
+        type: string
+    outputs:
+      comment_id:
+        description: ID of the first added comment
+        value: ${{ jobs.safe_outputs.outputs.comment_id }}
+      comment_url:
+        description: URL of the first added comment
+        value: ${{ jobs.safe_outputs.outputs.comment_url }}
   workflow_dispatch:
     inputs:
       aw_context:
@@ -67,11 +80,14 @@ run-name: "drasi-issue-researcher"
 
 jobs:
   activation:
+    needs: pre_activation
+    if: needs.pre_activation.outputs.activated == 'true'
     runs-on: ubuntu-slim
     permissions:
       actions: read
       contents: read
     outputs:
+      artifact_prefix: ${{ steps.artifact-prefix.outputs.prefix }}
       comment_id: ""
       comment_repo: ""
       lockdown_check_failed: ${{ steps.generate_aw_info.outputs.lockdown_check_failed == 'true' }}
@@ -692,7 +708,7 @@ jobs:
             const { main } = require('${{ runner.temp }}/gh-aw/actions/redact_secrets.cjs');
             await main();
         env:
-          GH_AW_SECRET_NAMES: 'COPILOT_GITHUB_TOKEN,GH_AW_GITHUB_MCP_SERVER_TOKEN,GH_AW_GITHUB_TOKEN,GITHUB_TOKEN'
+          GH_AW_SECRET_NAMES: 'COPILOT_GITHUB_TOKEN,GH_AW_GITHUB_MCP_SERVER_TOKEN,GH_AW_GITHUB_TOKEN,GITHUB_TOKEN,ISSUE_UPDATE_TOKEN'
           SECRET_COPILOT_GITHUB_TOKEN: ${{ secrets.COPILOT_GITHUB_TOKEN }}
           SECRET_GH_AW_GITHUB_MCP_SERVER_TOKEN: ${{ secrets.GH_AW_GITHUB_MCP_SERVER_TOKEN }}
           SECRET_GH_AW_GITHUB_TOKEN: ${{ secrets.GH_AW_GITHUB_TOKEN }}

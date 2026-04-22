@@ -1,0 +1,6 @@
+{
+  "name": "Drasi PR Assignment Check",
+  "description": "Ensures external contributors have a linked issue and are assigned before submitting PRs.",
+  "iconName": "octicon shield-check",
+  "categories": ["PR", "Governance"]
+}

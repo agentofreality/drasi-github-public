@@ -1,0 +1,7 @@
+{
+  "name": "Drasi Rust Unit Tests",
+  "description": "Run Rust unit tests using the org-wide reusable workflow (includes Cargo caching, Redis, system deps).",
+  "iconName": "octicon gear",
+  "categories": ["Rust", "CI"],
+  "filePatterns": ["Cargo.toml"]
+}

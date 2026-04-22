@@ -1,0 +1,6 @@
+{
+  "name": "Drasi DevSkim",
+  "description": "Run Microsoft DevSkim security scanner and upload results to the GitHub Security tab.",
+  "iconName": "octicon shield",
+  "categories": ["Security"]
+}

@@ -1,17 +1,8 @@
 ---
 on:
-  workflow_dispatch:
-    inputs:
-      issue_url:
-        description: "Full URL of the issue to research (e.g. https://github.com/drasi-project/drasi-core/issues/42)"
-        required: true
-        type: string
-  workflow_call:
-    inputs:
-      issue_url:
-        description: "Full URL of the issue to research"
-        required: true
-        type: string
+  issues:
+    types: [labeled]
+    names: [needs-research]
 permissions:
   contents: read
   actions: read
@@ -22,17 +13,14 @@ tools:
 safe-outputs:
   add-comment:
     max: 1
-    target: "*"
-    allowed-repos: ["drasi-project/*", "ruokun-niu/*"]
-    github-token: ${{ secrets.ISSUE_UPDATE_TOKEN }}
 ---
 
 # drasi-issue-researcher
 
 You are drasi-issue-researcher, a research-only engineering agent for the drasi project.
 
-Trigger: You are triggered via workflow_dispatch with an issue URL input: "${{ inputs.issue_url }}"
-Fetch and analyze the issue at that URL.
+Trigger: You are invoked for a GitHub Issue after a "needs-research" label is applied.
+Analyze this issue: "${{ needs.activation.outputs.text }}"
 
 Your job: produce a single, structured Research Brief comment that helps a human (or later coding agent) implement the issue correctly.
 

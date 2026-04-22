@@ -1,0 +1,173 @@
+name: Rust Lint
+
+on:
+  workflow_call:
+    inputs:
+      working-directory:
+        description: "Directory containing the Rust project (relative to repo root)"
+        required: false
+        type: string
+        default: "."
+      submodules:
+        description: "Whether to checkout submodules ('true', 'recursive', or 'false')"
+        required: false
+        type: string
+        default: "recursive"
+      clippy-command:
+        description: "Command to run clippy (e.g. 'cargo clippy --all-targets' or 'make clippy')"
+        required: false
+        type: string
+        default: "cargo clippy --all-targets"
+      fmt-command:
+        description: "Command to run format check (e.g. 'cargo fmt -- --check' or 'make fmt-check')"
+        required: false
+        type: string
+        default: "cargo fmt -- --check"
+      install-protobuf:
+        description: "Install protobuf-compiler"
+        required: false
+        type: boolean
+        default: true
+      install-jq:
+        description: "Install libjq-dev and libonig-dev and set JQ_LIB_DIR"
+        required: false
+        type: boolean
+        default: false
+      additional-apt-packages:
+        description: "Space-separated list of extra apt packages to install"
+        required: false
+        type: string
+        default: "build-essential autoconf automake libtool flex bison"
+      runner:
+        description: "GitHub Actions runner label"
+        required: false
+        type: string
+        default: "ubuntu-latest"
+
+permissions:
+  contents: read
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  clippy:
+    name: Cargo Clippy
+    runs-on: ${{ inputs.runner }}
+    defaults:
+      run:
+        working-directory: ${{ inputs.working-directory }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # 6.0.2
+        with:
+          submodules: ${{ inputs.submodules }}
+
+      - name: Install system dependencies
+        run: |
+          packages=""
+          if [[ "${{ inputs.install-jq }}" == "true" ]]; then
+            packages="libjq-dev libonig-dev"
+          fi
+          if [[ "${{ inputs.install-protobuf }}" == "true" ]]; then
+            packages="$packages protobuf-compiler"
+          fi
+          if [[ -n "${{ inputs.additional-apt-packages }}" ]]; then
+            packages="$packages ${{ inputs.additional-apt-packages }}"
+          fi
+          if [[ -n "$packages" ]]; then
+            sudo apt-get update && sudo apt-get install -y $packages
+          fi
+
+      - name: Set JQ_LIB_DIR
+        if: inputs.install-jq
+        run: echo "JQ_LIB_DIR=/usr/lib/x86_64-linux-gnu" >> $GITHUB_ENV
+
+      - name: Install Rust 1.88.0
+        run: |
+          rustup toolchain install 1.88.0 --profile minimal --component clippy
+          rustup default 1.88.0
+
+      - name: Cache Cargo registry
+        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
+        with:
+          path: ~/.cargo/registry
+          key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-registry-
+
+      - name: Cache Cargo index
+        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
+        with:
+          path: ~/.cargo/git
+          key: ${{ runner.os }}-cargo-index-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-index-
+
+      - name: Cache Cargo build
+        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
+        with:
+          path: target
+          key: ${{ runner.os }}-cargo-clippy-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-clippy-
+
+      - name: Run Clippy
+        run: ${{ inputs.clippy-command }}
+
+  fmt:
+    name: Cargo Fmt
+    runs-on: ${{ inputs.runner }}
+    defaults:
+      run:
+        working-directory: ${{ inputs.working-directory }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          submodules: ${{ inputs.submodules }}
+
+      - name: Install system dependencies
+        run: |
+          packages=""
+          if [[ "${{ inputs.install-jq }}" == "true" ]]; then
+            packages="libjq-dev libonig-dev"
+          fi
+          if [[ "${{ inputs.install-protobuf }}" == "true" ]]; then
+            packages="$packages protobuf-compiler"
+          fi
+          if [[ -n "${{ inputs.additional-apt-packages }}" ]]; then
+            packages="$packages ${{ inputs.additional-apt-packages }}"
+          fi
+          if [[ -n "$packages" ]]; then
+            sudo apt-get update && sudo apt-get install -y $packages
+          fi
+
+      - name: Install Rust 1.88.0
+        run: |
+          rustup toolchain install 1.88.0 --profile minimal --component rustfmt
+          rustup default 1.88.0
+
+      - name: Run Format Check
+        run: ${{ inputs.fmt-command }}
+
+  typos:
+    name: Typo Check
+    runs-on: ${{ inputs.runner }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          submodules: ${{ inputs.submodules }}
+
+      - name: Fetch central typos config
+        if: ${{ hashFiles('_typos.toml') == '' }}
+        run: |
+          curl -fsSL \
+            "https://raw.githubusercontent.com/drasi-project/.github/main/_typos.toml" \
+            -o "_typos.toml"
+
+      - name: Check for typos
+        uses: crate-ci/typos@cf5f1c29a8ac336af8568821ec41919923b05a83 # v1.45.1
+        with:
+          files: ${{ inputs.working-directory }}

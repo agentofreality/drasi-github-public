@@ -1,0 +1,29 @@
+name: Rust Unit Tests
+
+on:
+  push:
+    branches:
+      - $default-branch
+      - release/*
+    tags:
+      - v*
+  pull_request:
+    branches:
+      - $default-branch
+      - feature/*
+      - release/*
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    uses: drasi-project/.github/.github/workflows/rust-unit-test.yaml@main
+    # with:
+    #   test-command: "make test"              # default: "make test"
+    #   working-directory: "."                 # default: "."
+    #   install-protobuf: true                 # default: true
+    #   install-jq: true                       # default: true
+    #   additional-apt-packages: ""            # extra apt packages
+    #   submodules: "recursive"                # default: "recursive"
+    #   runner: "ubuntu-latest"                # default: "ubuntu-latest"
